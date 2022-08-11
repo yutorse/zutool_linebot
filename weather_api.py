@@ -86,6 +86,3 @@ def get_pressure_status(city_code, date):
     for i in range(24):
         pressure_info = pressure_info + f"{i}時 : {date_weather_status[i]['pressure']} hPa, 危険度{date_weather_status[i]['pressure_level']}\n"
     return pressure_info
-
-if __name__ == '__main__':
-    
