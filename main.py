@@ -1,3 +1,4 @@
+from calendar import c
 from flask import Flask, request, abort
 
 from linebot import (
@@ -56,33 +57,36 @@ def handle_message(event):
         )
     elif re.compile(r"今日\(\d{1,2}\/\d{1,2}\)").search(event.message.text):
         now = datetime.now()
-        today_weather_data = weather_api.get_pressure_status(user_location, "today")
+        today_weather_data = weather_api.get_pressure_status(user_location["city_code"], "today")
+        user_location_name = user_location["name"]
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=f"今日 {now.month}月{now.day}日 の気圧情報は\n{today_weather_data}")
+            TextSendMessage(text=f"今日 {now.month}月{now.day}日 {user_location_name}の気圧情報は\n{today_weather_data}")
         )
     elif re.compile(r"明日\(\d{1,2}\/\d{1,2}\)").search(event.message.text):
         now = datetime.now()
         tomorrow = now + timedelta(1)
-        tomorrow_weather_data = weather_api.get_pressure_status(user_location, "tommorow")
+        tomorrow_weather_data = weather_api.get_pressure_status(user_location["city_code"], "tommorow")
+        user_location_name = user_location["name"]
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=f"明日 {tomorrow.month}月{tomorrow.day}日 の気圧情報は\n{tomorrow_weather_data}")
+            TextSendMessage(text=f"明日 {tomorrow.month}月{tomorrow.day}日 {user_location_name}の気圧情報は\n{tomorrow_weather_data}")
         )
     elif re.compile(r"明後日\(\d{1,2}\/\d{1,2}\)").search(event.message.text):
         now = datetime.now()
         day_after_tomorrow = now + timedelta(2)
-        day_after_tomorrow_weather_data = weather_api.get_pressure_status(user_location, "dayaftertomorrow")
+        day_after_tomorrow_weather_data = weather_api.get_pressure_status(user_location["city_code"], "dayaftertomorrow")
+        user_location_name = user_location["name"]
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=f"明日 {day_after_tomorrow.month}月{day_after_tomorrow.day}日 の気圧情報は\n{day_after_tomorrow_weather_data}")
+            TextSendMessage(text=f"明後日 {day_after_tomorrow.month}月{day_after_tomorrow.day}日 {user_location_name}の気圧情報は\n{day_after_tomorrow_weather_data}")
         )
 
 
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_location_message(event):
     global user_location
-    user_location = weather_api.get_city_code_2(event.message.address)
+    user_location = weather_api.get_location_info(event.message.address)
 
     now = datetime.now()
     tomorrow = now + timedelta(1)
@@ -111,6 +115,5 @@ def handle_location_message(event):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5002))
     app.run(host="0.0.0.0", port=port)
-    #app.run(port=5002)

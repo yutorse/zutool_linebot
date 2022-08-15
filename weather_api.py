@@ -41,7 +41,7 @@ def get_prefecture_from_location(location):
         return prefecture
 
 
-def get_city_code_2(user_location):
+def get_location_info(user_location):
     prefecture = get_prefecture_from_location(user_location)
 
     url = "https://zutool.jp/api/getweatherpoint/"+prefecture
@@ -63,7 +63,7 @@ def get_city_code_2(user_location):
         user_location_name = get_close_matches(user_location, name_list, n=1, cutoff=0.1)[0]
 
         for location_info in response_data:
-            if location_info["name"] == user_location_name: return location_info["city_code"]
+            if location_info["name"] == user_location_name: return {"city_code":location_info["city_code"], "name":location_info["name"]}
 
 
 def get_weather_status(city_code):
