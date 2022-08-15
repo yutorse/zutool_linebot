@@ -24,7 +24,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL.replace("postgres", "postgresql"), echo=True)
 
 global user_location, zutool_bot_called_users
 zutool_bot_called_users = set()
