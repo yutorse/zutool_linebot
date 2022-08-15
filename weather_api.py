@@ -81,8 +81,15 @@ def get_weather_status(city_code):
         return response_data
 
 def get_pressure_status(city_code, date):
+    pressure_level = [
+        "通常😐",
+        "通常😐",
+        "やや注意😨",
+        "注意😵",
+        "警戒😱"
+    ]
     pressure_info = ""
     date_weather_status = get_weather_status(city_code)[date]
     for i in range(24):
-        pressure_info = pressure_info + f"{i}時 : {date_weather_status[i]['pressure']} hPa, 危険度{date_weather_status[i]['pressure_level']}\n"
+        pressure_info = pressure_info + f"{i}時 : {date_weather_status[i]['pressure']} hPa, {pressure_level[int(date_weather_status[i]['pressure_level'])]}\n"
     return pressure_info
