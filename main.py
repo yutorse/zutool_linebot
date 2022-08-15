@@ -1,4 +1,3 @@
-from calendar import c
 from flask import Flask, request, abort
 
 from linebot import (
@@ -25,7 +24,8 @@ YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
-global user_location
+global user_location, zutool_bot_called_users
+zutool_bot_called_users = set()
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -48,6 +48,8 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     if event.message.text == '!頭痛ーる' or event.message.text == '！頭痛ーる':
+        zutool_bot_called_users.add(event.source.user_id)
+
         line_bot_api.reply_message(
             event.reply_token,
             [
@@ -79,39 +81,41 @@ def handle_message(event):
         user_location_name = user_location["name"]
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=f"明後日 {day_after_tomorrow.month}月{day_after_tomorrow.day}日 {user_location_name}の気圧情報は\n{day_after_tomorrow_weather_data}")
+            TextSendMessage(text=f"明日 {day_after_tomorrow.month}月{day_after_tomorrow.day}日 {user_location_name}の気圧情報は\n{day_after_tomorrow_weather_data}")
         )
 
 
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_location_message(event):
-    global user_location
-    user_location = weather_api.get_location_info(event.message.address)
+    if event.source.user_id in zutool_bot_called_users:
+        global user_location
+        user_location = weather_api.get_location_info(event.message.address)
 
-    now = datetime.now()
-    tomorrow = now + timedelta(1)
-    day_after_tomorrow = now + timedelta(2)
+        zutool_bot_called_users.remove(event.source.user_id)
 
-    print(event.message.address)
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(
-            text = "日時を指定してください。",
-            quick_reply=QuickReply(
-                items=[
-                    QuickReplyButton(
-                        action=MessageAction(label=f"今日({now.month}/{now.day})", text=f"今日({now.month}/{now.day})")
-                    ),
-                    QuickReplyButton(
-                        action=MessageAction(label=f"明日({tomorrow.month}/{tomorrow.day})", text=f"明日({tomorrow.month}/{tomorrow.day})")
-                    ),
-                    QuickReplyButton(
-                        action=MessageAction(label=f"明後日({day_after_tomorrow.month}/{day_after_tomorrow.day})", text=f"明後日({day_after_tomorrow.month}/{day_after_tomorrow.day})")
-                    ),
-                ]
+        now = datetime.now()
+        tomorrow = now + timedelta(1)
+        day_after_tomorrow = now + timedelta(2)
+
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(
+                text = "日時を指定してください。",
+                quick_reply=QuickReply(
+                    items=[
+                        QuickReplyButton(
+                            action=MessageAction(label=f"今日({now.month}/{now.day})", text=f"今日({now.month}/{now.day})")
+                        ),
+                        QuickReplyButton(
+                            action=MessageAction(label=f"明日({tomorrow.month}/{tomorrow.day})", text=f"明日({tomorrow.month}/{tomorrow.day})")
+                        ),
+                        QuickReplyButton(
+                            action=MessageAction(label=f"明後日({day_after_tomorrow.month}/{day_after_tomorrow.day})", text=f"明後日({day_after_tomorrow.month}/{day_after_tomorrow.day})")
+                        ),
+                    ]
+                )
             )
         )
-    )
 
 
 if __name__ == "__main__":
