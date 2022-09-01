@@ -111,7 +111,7 @@ def handle_message(event):
                     "SELECT city_code FROM user_location WHERE location_name = :location_name"
                 ),
                 {"location_name": event.message.text}
-            )).one()
+            )).first()
 
         global user_location
         city_code = str(result).replace("(", "").replace(")", "").replace(",", "").replace("'", "")
