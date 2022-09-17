@@ -50,7 +50,7 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    if event.message.text == '!頭痛ーる' or event.message.text == '！頭痛ーる':
+    if event.message.text in ['!頭痛ーる', '！頭痛ーる', '!ずつーる', '！ずつーる']:
         zutool_bot_called_users.add(event.source.user_id)
 
         with engine.begin() as conn:
@@ -165,7 +165,7 @@ def handle_message(event):
         user_location_name = user_location["name"]
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=f"明日 {day_after_tomorrow.month}月{day_after_tomorrow.day}日 {user_location_name} の気圧情報は\n{day_after_tomorrow_weather_data}")
+            TextSendMessage(text=f"明後日 {day_after_tomorrow.month}月{day_after_tomorrow.day}日 {user_location_name} の気圧情報は\n{day_after_tomorrow_weather_data}")
         )
 
 
